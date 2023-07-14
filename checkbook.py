@@ -1,3 +1,21 @@
+# Command Line Checkbook Application
+# You will create a command line checkbook application that allows users to track their finances with a command line interface.
+# Build a .py file that will be run from the command line.
+
+# When run, the application should welcome the user, and prompt them for an action to take:
+
+# view current balance
+# add a debit (withdrawal)
+# add a credit (deposit)
+# exit
+# The application should notify the user if the input is invalid and prompt for another choice.
+
+#The application should persist between times that it is run.
+
+#Example, if you run the application, add some credits, exit the application and run it again, you should still see the balance that you previously created. In order to do this, your application will need to store its data in a text file. Consider creating a file where each line in the file represents a single transaction.
+#Utilize functions to call the balance, debit, credit, and exit
+# [THIS IS NOT COMPLETE YET STILL NEED TO WORK ON JUST POSTED TO SHOW MY TRIED WORK]
+
 import json
 import os
 
@@ -37,16 +55,6 @@ def add_debit():
             print("Debit successfully recorded.")
 
 
-def add_credit():
-    amount = float(input("Enter the amount to deposit: "))
-    with open(working_file, "r") as file:
-        data = json.load(file)
-        balance = float(data[0]["balance"])
-        balance += amount
-        data[0]["balance"] = balance
-        with open(working_file, "w") as file:
-            json.dump(data, file, indent=4)
-        print("Credit successfully recorded.")
 
 def exit_program():
     print("Thank you for using the Checkbook Application!")
