@@ -1,77 +1,81 @@
-# Command Line Checkbook Application
-# You will create a command line checkbook application that allows users to track their finances with a command line interface.
-# Build a .py file that will be run from the command line.
-
-# When run, the application should welcome the user, and prompt them for an action to take:
-
-# view current balance
-# add a debit (withdrawal)
-# add a credit (deposit)
-# exit
-# The application should notify the user if the input is invalid and prompt for another choice.
-
-#The application should persist between times that it is run.
-
-#Example, if you run the application, add some credits, exit the application and run it again, you should still see the balance that you previously created. In order to do this, your application will need to store its data in a text file. Consider creating a file where each line in the file represents a single transaction.
-#Utilize functions to call the balance, debit, credit, and exit
-# [THIS IS NOT COMPLETE YET STILL NEED TO WORK ON JUST POSTED TO SHOW MY TRIED WORK]
-
 import json
-import os
+import os 
 
-working_file = "checkbook.json"
-balance = 0
-
-def welcome():
-    print("Welcome to the Checkbook Application!")
-
-def menu_display():
-    print("Menu:")
-    print("1. View current balance")
-    print("2. Add a Debit (Withdrawal)")
-    print("3. Add a Credit (Deposit)")
-    print("4. Exit")
-
-
-
-def view_balance():
-    with open(working_file, "r") as file:
+# Load data from the JSON file and initialize variables
+def load_data(file_path):
+    with open(file_path, 'r') as file:
         data = json.load(file)
-        balance = data[0]["balance"]
-        print(f"Current balance: {balance}")
+    return data
 
-def add_debit():
-    amount = float(input("Enter the amount to withdraw: "))
-    with open(working_file, "r") as file:
-        data = json.load(file)
-        balance = float(data[0]["balance"])
-        if amount > balance:
-            print("Insufficient balance.")
+def save_data(file_path, data):
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+# Function to view the current balance
+def view_balance(data):
+    total_balance = sum(float(item['balance'].replace(',', '').replace('$', '')) for item in data)
+    return total_balance
+
+# Function to add a debit (withdrawal)
+def add_debit(data, account_number, amount):
+    for item in data:
+        if item['account_number'] == account_number:
+            balance = float(item['balance'].replace(',', '').replace('$', ''))
+            if amount <= balance:
+                item['balance'] = "${:,.2f}".format(balance - amount)
+                print(f"Withdrawal of ${amount:.2f} from account {account_number} successful.")
+                return True
+            else:
+                print("Insufficient funds.")
+                return False
+    print(f"Account {account_number} not found.")
+    return False
+
+# Function to add a credit (deposit)
+def add_credit(data, account_number, amount):
+    for item in data:
+        if item['account_number'] == account_number:
+            balance = float(item['balance'].replace(',', '').replace('$', ''))
+            item['balance'] = "${:,.2f}".format(balance + amount)
+            print(f"Deposit of ${amount:.2f} to account {account_number} successful.")
+            return True
+    print(f"Account {account_number} not found.")
+    return False
+
+def main():
+    file_path = "data.json"
+    data = load_data(file_path)
+
+    while True:
+        print("\nWelcome to the Command Line Checkbook Application!")
+        print("1. View Current Balance")
+        print("2. Add a Debit (Withdrawal)")
+        print("3. Add a Credit (Deposit)")
+        print("4. Exit")
+
+        choice = input("Please enter the number of the action you want to take: ")
+
+        if choice == "1":
+            balance = view_balance(data)
+            print(f"Your current balance is ${balance:.2f}")
+
+        elif choice == "2":
+            account_number = input("Enter the account number: ")
+            amount = float(input("Enter the amount to withdraw: "))
+            add_debit(data, account_number, amount)
+
+        elif choice == "3":
+            account_number = input("Enter the account number: ")
+            amount = float(input("Enter the amount to deposit: "))
+            add_credit(data, account_number, amount)
+
+        elif choice == "4":
+            save_data(file_path, data)
+            print("Thank you for using the Checkbook Application. Goodbye!")
+            break
+
         else:
-            balance -= amount
-            data[0]["balance"] = balance
-            with open(working_file, "w") as file:
-                json.dump(data, file, indent=4)
-            print("Debit successfully recorded.")
+            print("Invalid input. Please try again.")
 
-
-
-def exit_program():
-    print("Thank you for using the Checkbook Application!")
-
-
-while True:
-    welcome()
-    menu_display()
-
-    your_choice = input("Enter your choice (1-4): ")
-    if your_choice == '1':
-        view_balance()
-    elif your_choice == '2':
-        add_debit()
-    elif your_choice == '3':
-        add_credit()
-    elif your_choice == '4':
-        exit_program()
-    else:
-        print("Invalid input. Please try again.")
+if __name__ == "__main__":
+    main()
