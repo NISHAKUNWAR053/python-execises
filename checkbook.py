@@ -1,81 +1,67 @@
+import os
 import json
-import os 
 
-# Load data from the JSON file and initialize variables
-def load_data(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
+def get_data_file_path():
+    return "checkbook_data.json"
+
+def load_data():
+    data_file_path = get_data_file_path()
+    if os.path.exists(data_file_path):
+        with open(data_file_path, "r") as file:
+            data = json.load(file)
+    else:
+        data = {
+            "name": "Nisha",
+            "balance": 50000.0,
+            "debit": 0.0,
+            "credit": 0.0
+        }
     return data
 
-def save_data(file_path, data):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+def save_data(data):
+    data_file_path = get_data_file_path()
+    with open(data_file_path, "w") as file:
+        json.dump(data, file)
 
-# Function to view the current balance
-def view_balance(data):
-    total_balance = sum(float(item['balance'].replace(',', '').replace('$', '')) for item in data)
-    return total_balance
+def print_options():
+    print("Input your choices 1 through 4")
+    print("1) view current balance")
+    print("2) record a debit (withdraw)")
+    print("3) record a credit (deposit)")
+    print("4) exit")
+    print()
 
-# Function to add a debit (withdrawal)
-def add_debit(data, account_number, amount):
-    for item in data:
-        if item['account_number'] == account_number:
-            balance = float(item['balance'].replace(',', '').replace('$', ''))
-            if amount <= balance:
-                item['balance'] = "${:,.2f}".format(balance - amount)
-                print(f"Withdrawal of ${amount:.2f} from account {account_number} successful.")
-                return True
-            else:
-                print("Insufficient funds.")
-                return False
-    print(f"Account {account_number} not found.")
-    return False
+def withdraw(debit):
+    data["debit"] = debit
+    data["balance"] -= debit
+    return data["balance"]
 
-# Function to add a credit (deposit)
-def add_credit(data, account_number, amount):
-    for item in data:
-        if item['account_number'] == account_number:
-            balance = float(item['balance'].replace(',', '').replace('$', ''))
-            item['balance'] = "${:,.2f}".format(balance + amount)
-            print(f"Deposit of ${amount:.2f} to account {account_number} successful.")
-            return True
-    print(f"Account {account_number} not found.")
-    return False
+def deposit(credit):
+    data["credit"] = credit
+    data["balance"] += credit
+    return data["balance"]
 
-def main():
-    file_path = "data.json"
-    data = load_data(file_path)
+def balance():
+    return data["balance"]
 
-    while True:
-        print("\nWelcome to the Command Line Checkbook Application!")
-        print("1. View Current Balance")
-        print("2. Add a Debit (Withdrawal)")
-        print("3. Add a Credit (Deposit)")
-        print("4. Exit")
+data = load_data()
 
-        choice = input("Please enter the number of the action you want to take: ")
+print(" ~~~ Welcome to your terminal checkbook! ~~~", data["name"])
+while True:
+    print_options()
+    inp = int(input("Your Choice is: "))
 
-        if choice == "1":
-            balance = view_balance(data)
-            print(f"Your current balance is ${balance:.2f}")
-
-        elif choice == "2":
-            account_number = input("Enter the account number: ")
-            amount = float(input("Enter the amount to withdraw: "))
-            add_debit(data, account_number, amount)
-
-        elif choice == "3":
-            account_number = input("Enter the account number: ")
-            amount = float(input("Enter the amount to deposit: "))
-            add_credit(data, account_number, amount)
-
-        elif choice == "4":
-            save_data(file_path, data)
-            print("Thank you for using the Checkbook Application. Goodbye!")
-            break
-
-        else:
-            print("Invalid input. Please try again.")
-
-if __name__ == "__main__":
-    main()
+    if inp == 1:
+        print("Your balance is:", balance())
+    elif inp == 2:
+        dbt_amt = float(input("Amount to withdraw: "))
+        print("Your balance is:", withdraw(dbt_amt))
+    elif inp == 3:
+        crdt_amt = float(input("Amount to deposit: "))
+        print("Your balance is:", deposit(crdt_amt))
+    elif inp == 4:
+        print("Thanks, have a great day!")
+        save_data(data)  # Save data before exiting
+        break
+    else:
+        print("Please enter a valid input (1, 2, 3, or 4).")
