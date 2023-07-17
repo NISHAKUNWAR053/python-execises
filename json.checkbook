@@ -1,0 +1,3 @@
+
+F_J = '{"name": "Nisha", "balance": 50000, "debit": 0 ,"credit": 0 }'
+F_D = json.loads(F_J)
